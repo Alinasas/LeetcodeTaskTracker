@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode Progress Tracker</title>
+    <style>
+        /* Версия CSS: 2.0 - Обновлено для hover эффектов */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        /* CSS переменные */
+        :root {
+            /* Цвета */
+            --primary-bg: #fafafa;
+            --secondary-bg: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --border-light: #e5e7eb;
+            --border-medium: #d1d5db;
+            --border-strong: #9ca3af;
+            
+            /* Цвета сложности */
+            --easy-color: #10b981;
+            --medium-color: #f59e0b;
+            --hard-color: #ef4444;
+            
+            /* Цвета розовых обводок */
+            --easy-border: #fce7f3;
+            --medium-border: #f9a8d4;
+            --hard-border: #f472b6;
+            
+            /* Размеры */
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+            --spacing-xs: 8px;
+            --spacing-sm: 16px;
+            --spacing-md: 24px;
+            --spacing-lg: 32px;
+            --spacing-xl: 40px;
+            
+            /* Тени */
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+            
+            /* Анимации */
+            --transition-fast: 0.2s ease;
+            --transition-normal: 0.3s ease;
+            --transition-slow: 0.6s ease;
+            
+            /* Размеры шариков */
+            --ball-size-easy: 30px;
+            --ball-size-medium: 90px;
+            --ball-size-hard: 180px;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--primary-bg);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--secondary-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #fef7f7 0%, #fdf2f8 25%, #fce7f3 50%, #fbcfe8 75%, #f9a8d4 100%);
+            color: #1a1a1a;
+            padding: 48px 40px;
+            text-align: center;
+            position: relative;
+            border-bottom: 1px solid #e5e7eb;
+            animation: slideInFromTop 1s ease-out;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: shimmer 4s ease-in-out infinite;
+        }
+        
+        .header > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: #1a1a1a;
+        }
+        
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+            background: #ffffff;
+            padding: 24px 32px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+            opacity: 1;
+        }
+        
+        .stat-item:nth-child(1) { animation-delay: 0.1s; }
+        .stat-item:nth-child(2) { animation-delay: 0.2s; }
+        .stat-item:nth-child(3) { animation-delay: 0.3s; }
+        .stat-item:nth-child(4) { animation-delay: 0.4s; }
+        
+        .stat-item:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: #d1d5db;
+            opacity: 0.3 !important;
+            background: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .stat-item:hover .stat-number {
+            color: #ff6b6b !important;
+        }
+        
+        .stat-item:hover .stat-label {
+            color: #ff6b6b !important;
+        }
+        
+        .stat-number {
+            font-size: 2.25em;
+            font-weight: 600;
+            display: block;
+            color: #1a1a1a;
+        }
+        
+        .stat-label {
+            font-size: 0.875em;
+            margin-top: 8px;
+            font-weight: 500;
+            color: #6b7280;
+        }
+        
+        .table-container {
+            padding: 32px;
+            overflow-x: auto;
+        }
+        
+        .task-controls {
+            margin-top: 32px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f8bbd9 0%, #f4a6d1 100%);
+            color: white;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #f0a3c7;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            background: linear-gradient(135deg, #f6a8d1 0%, #f29bc8 100%);
+        }
+        
+        .btn-danger {
+            background: none;
+            color: #9ca3af;
+            box-shadow: none;
+            border: none;
+            padding: 4px;
+            min-width: auto;
+        }
+        
+        .btn-danger:hover {
+            transform: none;
+            box-shadow: none;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .btn-sm {
+            padding: 4px;
+            font-size: 12px;
+        }
+        
+        .btn-icon {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .delete-task-btn .btn-icon {
+            font-size: 18px;
+            font-weight: 300;
+            transition: var(--transition-fast);
+        }
+        
+        .delete-task-btn:hover .btn-icon {
+            transform: scale(1.1);
+        }
+        
+        .actions-cell {
+            text-align: center;
+            width: 80px;
+        }
+        
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-content {
+            background-color: var(--secondary-bg);
+            margin: 5% auto;
+            padding: 0;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1.25em;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition-fast);
+        }
+        
+        .modal-close:hover {
+            background-color: var(--border-light);
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-light);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-sm);
+            font-size: 14px;
+            transition: var(--transition-fast);
+            background-color: var(--secondary-bg);
+            color: var(--text-primary);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .btn-secondary {
+            background: var(--border-light);
+            color: var(--text-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border-medium);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            animation: fadeInUp 0.8s ease-out 0.5s both;
+        }
+        
+        th {
+            background: #f9fafb;
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: 0.875em;
+            letter-spacing: 0.025em;
+        }
+        
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+            transition: all 0.2s ease;
+            color: #1a1a1a;
+        }
+        
+        tr {
+            transition: all 0.3s ease;
+            animation: fadeInLeft 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        tr:nth-child(1) { animation-delay: 0.1s; }
+        tr:nth-child(2) { animation-delay: 0.15s; }
+        tr:nth-child(3) { animation-delay: 0.2s; }
+        tr:nth-child(4) { animation-delay: 0.25s; }
+        tr:nth-child(5) { animation-delay: 0.3s; }
+        tr:nth-child(6) { animation-delay: 0.35s; }
+        tr:nth-child(7) { animation-delay: 0.4s; }
+        tr:nth-child(8) { animation-delay: 0.45s; }
+        tr:nth-child(9) { animation-delay: 0.5s; }
+        tr:nth-child(10) { animation-delay: 0.55s; }
+        tr:nth-child(n+11) { animation-delay: 0.6s; }
+        
+        tr:hover {
+            background: #f9fafb;
+        }
+        
+        /* Сине-голубое цветовое кодирование по сложности с прогрессом */
+        .easy {
+            background: #f8fafc;
+            border-left: 3px solid #fecaca;
+        }
+        
+        .medium {
+            background: #f1f5f9;
+            border-left: 3px solid #f9a8d4;
+        }
+        
+        .hard {
+            background: #e2e8f0;
+            border-left: 3px solid #f472b6;
+        }
+        
+        /* Обеспечиваем видимость текста поверх прогресса */
+        tr td {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            transform: scale(1.2);
+        }
+        
+        .checkbox-cell {
+            text-align: center;
+            padding: 8px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .checkbox-label input[type="checkbox"] {
+            display: none;
+        }
+        
+        .checkmark {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            background: #ffffff;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .checkbox-label:hover .checkmark {
+            border-color: #9ca3af;
+        }
+        
+        .checkbox-label input[type="checkbox"]:checked + .checkmark {
+            background: #64748b;
+            border-color: #64748b;
+            animation: checkboxPinkShimmer 5s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .checkbox-label input[type="checkbox"]:checked + .checkmark::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.4), 
+                transparent);
+            animation: shimmerWave 1.5s ease-in-out 3, hideShimmer 0s ease-in-out 4.5s forwards;
+        }
+        
+        /* Скрываем псевдоэлемент после завершения анимации */
+        .checkbox-label input[type="checkbox"]:checked + .checkmark.animation-complete::before {
+            display: none;
+        }
+        
+        .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .checkbox-text {
+            font-size: 0.75em;
+            color: #6b7280;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+        
+        .task-title {
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+        
+        .task-link {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        
+        .task-link:hover {
+            color: #374151;
+            text-decoration: underline;
+        }
+        
+        .difficulty-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            transition: all 0.2s ease;
+            border: 2px solid;
+        }
+        
+        .difficulty-easy {
+            background: #f8fafc;
+            color: #64748b;
+            border-color: #fecaca;
+        }
+        
+        .difficulty-medium {
+            background: #f1f5f9;
+            color: #475569;
+            border-color: #f9a8d4;
+        }
+        
+        .difficulty-hard {
+            background: #e2e8f0;
+            color: #334155;
+            border-color: #f472b6;
+        }
+        
+        .leetcode-link {
+            color: #2a5298;
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        .leetcode-link:hover {
+            color: #1e3c72;
+            text-decoration: underline;
+        }
+        
+        .theme {
+            font-style: italic;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .ideas {
+            font-size: 0.85em;
+            color: #495057;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .notes-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.9em;
+            background-color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .notes-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .notes-input:hover {
+            border-color: #adb5bd;
+            background-color: white;
+        }
+        
+        .editable-cell {
+            cursor: pointer;
+            position: relative;
+            min-height: 40px;
+            padding: 8px 12px;
+        }
+        
+        .editable-cell:hover {
+            background-color: rgba(79, 172, 254, 0.1);
+            transition: background-color 0.2s ease;
+        }
+        
+        .editable-cell:hover::after {
+            content: '✏️';
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8em;
+            opacity: 0.6;
+        }
+        
+        .cell-content {
+            display: block;
+            min-height: 20px;
+            color: #495057;
+        }
+        
+        .cell-content:empty::before {
+            content: '';
+        }
+        
+        .editable-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #4facfe;
+            border-radius: 6px;
+            font-size: 0.9em;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+            outline: none;
+            box-sizing: border-box;
+        }
+        
+        .save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ffffff;
+            color: #1a1a1a;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.875em;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e5e7eb;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .save-indicator.show {
+            transform: translateX(0);
+        }
+        
+        .save-indicator.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+        
+        .save-indicator.saving {
+            background: #eff6ff;
+            color: #2563eb;
+            border-color: #bfdbfe;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 32px;
+            animation: fadeInUp 0.6s ease-out 0.3s both;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #64748b;
+            transition: width 0.3s ease;
+            border-radius: 8px;
+        }
+        
+        
+        
+        /* Анимации появления */
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeInRight {
+            0% {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes scaleIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        @keyframes slideInFromTop {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        
+        @keyframes checkboxPinkShimmer {
+            0% {
+                background: #f8bbd9;
+                border-color: #f4a6d1;
+                box-shadow: 0 0 10px rgba(248, 187, 217, 0.5);
+            }
+            20% {
+                background: #f6a8d1;
+                border-color: #f29bc8;
+                box-shadow: 0 0 15px rgba(246, 168, 209, 0.7);
+            }
+            40% {
+                background: #f4a6d1;
+                border-color: #f0a3c7;
+                box-shadow: 0 0 20px rgba(244, 166, 209, 0.8);
+            }
+            60% {
+                background: #f6a8d1;
+                border-color: #f29bc8;
+                box-shadow: 0 0 15px rgba(246, 168, 209, 0.7);
+            }
+            80% {
+                background: #f8bbd9;
+                border-color: #f4a6d1;
+                box-shadow: 0 0 10px rgba(248, 187, 217, 0.5);
+            }
+            100% {
+                background: #64748b;
+                border-color: #64748b;
+                box-shadow: none;
+            }
+        }
+        
+        @keyframes shimmerWave {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+        
+        @keyframes hideShimmer {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                display: none;
+            }
+        }
+        
+        /* Контейнер для шариков */
+        #balls-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        /* Летающие шарики */
+        .floating-ball {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: float 6s ease-in-out infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            
+        }
+        
+        .floating-ball:hover {
+            opacity: 1;
+            transform: scale(1.2);
+            z-index: 1000;
+        }
+        
+        .floating-ball:active {
+            transform: scale(0.9);
+        }
+        
+        .floating-ball.flying-away {
+            animation: flyToEdge 1s ease-out forwards;
+            animation-delay: 0s !important;
+            z-index: 1000;
+        }
+        
+        @keyframes flyToEdge {
+            0% {
+                transform: translateX(0) translateY(0) scale(1);
+                opacity: 1;
+            }
+            80% {
+                transform: translateX(var(--fly-x, 100vw)) translateY(var(--fly-y, -50vh)) scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(var(--fly-x, 100vw)) translateY(var(--fly-y, -50vh)) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        
+        
+        /* Размеры шариков в зависимости от сложности */
+        .floating-ball.ball-easy {
+            width: var(--ball-size-easy) !important;
+            height: var(--ball-size-easy) !important;
+            min-width: var(--ball-size-easy) !important;
+            min-height: var(--ball-size-easy) !important;
+            max-width: var(--ball-size-easy) !important;
+            max-height: var(--ball-size-easy) !important;
+        }
+        
+        .floating-ball.ball-medium {
+            width: var(--ball-size-medium) !important;
+            height: var(--ball-size-medium) !important;
+            min-width: var(--ball-size-medium) !important;
+            min-height: var(--ball-size-medium) !important;
+            max-width: var(--ball-size-medium) !important;
+            max-height: var(--ball-size-medium) !important;
+        }
+        
+        .floating-ball.ball-hard {
+            width: var(--ball-size-hard) !important;
+            height: var(--ball-size-hard) !important;
+            min-width: var(--ball-size-hard) !important;
+            min-height: var(--ball-size-hard) !important;
+            max-width: var(--ball-size-hard) !important;
+            max-height: var(--ball-size-hard) !important;
+        }
+        
+        /* Цвета для шариков разных сложностей */
+        .ball-easy {
+            background: linear-gradient(45deg, #f9a8d4, #fbcfe8);
+        }
+        
+        .ball-medium {
+            background: linear-gradient(45deg, #38bdf8, #7dd3fc);
+        }
+        
+        .ball-hard {
+            background: linear-gradient(45deg, #6ee7b7, #a7f3d0);
+        }
+        
+        /* Дополнительные цвета для разнообразия */
+        .ball-color-1 { background: linear-gradient(45deg, #f9a8d4, #fbcfe8); } /* Розовый */
+        .ball-color-2 { background: linear-gradient(45deg, #38bdf8, #7dd3fc); } /* Голубой */
+        .ball-color-3 { background: linear-gradient(45deg, #6ee7b7, #a7f3d0); } /* Зелёный */
+        .ball-color-4 { background: linear-gradient(45deg, #fbbf24, #fcd34d); } /* Жёлтый */
+        .ball-color-5 { background: linear-gradient(45deg, #c4b5fd, #ddd6fe); } /* Фиолетовый */
+        .ball-color-6 { background: linear-gradient(45deg, #f87171, #fca5a5); } /* Розово-красный */
+        .ball-color-7 { background: linear-gradient(45deg, #a78bfa, #c4b5fd); } /* Фиолетово-синий */
+        .ball-color-8 { background: linear-gradient(45deg, #34d399, #6ee7b7); } /* Зелёно-бирюзовый */
+        .ball-color-9 { background: linear-gradient(45deg, #f59e0b, #fbbf24); } /* Оранжевый */
+        .ball-color-10 { background: linear-gradient(45deg, #ec4899, #f9a8d4); } /* Розово-малиновый */
+        .ball-color-11 { background: linear-gradient(45deg, #06b6d4, #38bdf8); } /* Бирюзовый */
+        .ball-color-12 { background: linear-gradient(45deg, #10b981, #34d399); } /* Изумрудный */
+        .ball-color-13 { background: linear-gradient(45deg, #f97316, #fb923c); } /* Оранжево-красный */
+        .ball-color-14 { background: linear-gradient(45deg, #8b5cf6, #a78bfa); } /* Фиолетово-лиловый */
+        .ball-color-15 { background: linear-gradient(45deg, #ef4444, #f87171); } /* Красный */
+        .ball-color-16 { background: linear-gradient(45deg, #3b82f6, #60a5fa); } /* Синий */
+        .ball-color-17 { background: linear-gradient(45deg, #059669, #10b981); } /* Тёмно-зелёный */
+        .ball-color-18 { background: linear-gradient(45deg, #dc2626, #ef4444); } /* Тёмно-красный */
+        .ball-color-19 { background: linear-gradient(45deg, #7c3aed, #8b5cf6); } /* Тёмно-фиолетовый */
+        .ball-color-20 { background: linear-gradient(45deg, #0891b2, #06b6d4); } /* Тёмно-бирюзовый */
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px) translateX(0px) rotate(0deg) scale(1);
+            }
+            12.5% {
+                transform: translateY(-10px) translateX(10px) rotate(45deg) scale(1.02);
+            }
+            25% {
+                transform: translateY(-20px) translateX(20px) rotate(90deg) scale(0.98);
+            }
+            37.5% {
+                transform: translateY(-20px) translateX(20px) rotate(135deg) scale(1.05);
+            }
+            50% {
+                transform: translateY(-10px) translateX(-20px) rotate(180deg) scale(0.95);
+            }
+            62.5% {
+                transform: translateY(-20px) translateX(-20px) rotate(225deg) scale(1.02);
+            }
+            75% {
+                transform: translateY(-10px) translateX(-20px) rotate(270deg) scale(0.98);
+            }
+            87.5% {
+                transform: translateY(-15px) translateX(-10px) rotate(315deg) scale(1.03);
+            }
+            100% {
+                transform: translateY(0px) translateX(0px) rotate(360deg) scale(1);
+            }
+        }
+        
+        @keyframes floatFast {
+            0% {
+                transform: translateY(0px) translateX(0px) rotate(0deg) scale(1);
+            }
+            12.5% {
+                transform: translateY(-20px) translateX(20px) rotate(90deg) scale(1.05);
+            }
+            25% {
+                transform: translateY(-40px) translateX(40px) rotate(180deg) scale(0.95);
+            }
+            37.5% {
+                transform: translateY(-40px) translateX(40px) rotate(270deg) scale(1.1);
+            }
+            50% {
+                transform: translateY(-20px) translateX(-40px) rotate(360deg) scale(0.9);
+            }
+            62.5% {
+                transform: translateY(-40px) translateX(-40px) rotate(450deg) scale(1.05);
+            }
+            75% {
+                transform: translateY(-20px) translateX(-40px) rotate(540deg) scale(0.95);
+            }
+            87.5% {
+                transform: translateY(-30px) translateX(-20px) rotate(630deg) scale(1.08);
+            }
+            100% {
+                transform: translateY(0px) translateX(0px) rotate(720deg) scale(1);
+            }
+        }
+        
+        
+        
+        
+        @media (max-width: 768px) {
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            table {
+                font-size: 0.9em;
+            }
+            
+            th, td {
+                padding: 8px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <!-- Летающие шарики будут созданы динамически -->
+            <div id="balls-container"></div>
+            
+            <h1>LeetCode Progress Tracker</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="total-tasks">{{ tasks|length }}</span>
+                    <span class="stat-label">Всего задач</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="started-tasks">0</span>
+                    <span class="stat-label">Решено хотя бы раз</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="completed-tasks">0</span>
+                    <span class="stat-label">Полностью решено</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="progress-percent">0%</span>
+                    <span class="stat-label">Прогресс</span>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Статус</th>
+                        <th>Название</th>
+                        <th>Сложность</th>
+                        <th>Тема</th>
+                        <th>Идеи</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                <tr class="{{ task.difficulty.lower() }}" data-task-id="{{ task.number }}">
+                    <td>{{ task.number }}</td>
+                    <td class="checkbox-cell">
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" 
+                                       data-task-number="{{ task.number }}" 
+                                       data-solution="1"
+                                       {% if task.solution_1 %}checked{% endif %}
+                                       onchange="updateTaskStatus(this)">
+                                <span class="checkmark"></span>
+                                <span class="checkbox-text"></span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" 
+                                       data-task-number="{{ task.number }}" 
+                                       data-solution="2"
+                                       {% if task.solution_2 %}checked{% endif %}
+                                       onchange="updateTaskStatus(this)">
+                                <span class="checkmark"></span>
+                                <span class="checkbox-text"></span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" 
+                                       data-task-number="{{ task.number }}" 
+                                       data-solution="3"
+                                       {% if task.solution_3 %}checked{% endif %}
+                                       onchange="updateTaskStatus(this)">
+                                <span class="checkmark"></span>
+                                <span class="checkbox-text"></span>
+                            </label>
+                        </div>
+                    </td>
+                        <td class="task-title">
+                            {% if task.leetcode_link %}
+                                <a href="{{ task.leetcode_link }}" target="_blank" class="task-link">
+                                    {{ task.title }}
+                                </a>
+                            {% else %}
+                                {{ task.title }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="difficulty-badge difficulty-{{ task.difficulty.lower() }}">
+                                {{ task.difficulty }}
+                            </span>
+                        </td>
+                        <td class="editable-cell" 
+                            data-task-number="{{ task.number }}"
+                            data-field="theme"
+                            ondblclick="makeEditable(this)">
+                            <span class="cell-content">{{ task.theme if task.theme else '' }}</span>
+                        </td>
+                        <td class="editable-cell" 
+                            data-task-number="{{ task.number }}"
+                            data-field="ideas"
+                            ondblclick="makeEditable(this)">
+                            <span class="cell-content">{{ task.ideas if task.ideas else '' }}</span>
+                        </td>
+                        <td class="actions-cell">
+                            <button class="btn btn-danger btn-sm delete-task-btn" 
+                                    data-task-number="{{ task.number }}"
+                                    data-task-title="{{ task.title }}"
+                                    title="Удалить задачу">
+                                <span class="btn-icon">×</span>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Кнопка добавления задачи -->
+            <div class="task-controls">
+                <button id="add-task-btn" class="btn btn-primary">
+                    <span class="btn-icon">+</span>
+                    Добавить задачу
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Индикатор сохранения -->
+    <div id="save-indicator" class="save-indicator">
+        <span id="save-message">Заметки сохранены!</span>
+    </div>
+    
+    <!-- Модальное окно для добавления задачи -->
+    <div id="add-task-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить новую задачу</h3>
+                <button class="modal-close" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-task-form">
+                    <div class="form-group">
+                        <label for="task-title">Название задачи *</label>
+                        <input type="text" id="task-title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-difficulty">Сложность *</label>
+                        <select id="task-difficulty" name="difficulty" required>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-leetcode-link">LeetCode ссылка</label>
+                        <input type="url" id="task-leetcode-link" name="leetcode_link" placeholder="https://leetcode.com/problems/...">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-theme">Тема</label>
+                        <input type="text" id="task-theme" name="theme" placeholder="Например: Двумерные массивы">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-ideas">Идеи</label>
+                        <textarea id="task-ideas" name="ideas" rows="3" placeholder="Ваши идеи по решению..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancel-add-task">Отмена</button>
+                <button type="button" class="btn btn-primary" id="confirm-add-task">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Основная конфигурация приложения
+         * Содержит все константы для анимаций, размеров и позиций
+         */
+        const CONFIG = {
+            TOTAL_SOLUTIONS_PER_TASK: 3,
+            BALL_SIZES: {
+                EASY: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ball-size-easy')),
+                MEDIUM: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ball-size-medium')),
+                HARD: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ball-size-hard'))
+            },
+            ANIMATION: {
+                FLY_DURATION: 1000,
+                FLY_DELAY: 0,
+                RANDOM_COLORS: 20,
+                POSITION_RANGE: 100,
+                DELAY_RANGE: 5,
+                DURATION_RANGE: 10
+            },
+            EDGE_POSITIONS: {
+                NEAR_EDGE_MIN: 85,
+                NEAR_EDGE_MAX: 100,
+                FAR_EDGE_MIN: 0,
+                FAR_EDGE_MAX: 15
+            }
+        };
+        
+        // Динамически вычисляем количество задач
+        const TaskCounts = {
+            getCounts: function() {
+                const tasksData = {{ tasks|tojson }};
+                let easy = 0, medium = 0, hard = 0;
+                
+                tasksData.forEach(task => {
+                    const difficulty = task.difficulty.toLowerCase();
+                    if (difficulty === 'easy') easy++;
+                    else if (difficulty === 'medium') medium++;
+                    else if (difficulty === 'hard') hard++;
+                });
+                
+                return { EASY: easy, MEDIUM: medium, HARD: hard };
+            }
+        };
+        
+        // Устаревшие константы - используйте CONFIG
+        const TOTAL_SOLUTIONS_PER_TASK = CONFIG.TOTAL_SOLUTIONS_PER_TASK;
+        const TOTAL_BALL_COLORS = CONFIG.ANIMATION.RANDOM_COLORS;
+        const ANIMATION_DELAY_MAX = CONFIG.ANIMATION.DELAY_RANGE;
+        const ANIMATION_DURATION_MIN = CONFIG.ANIMATION.DELAY_RANGE;
+        const ANIMATION_DURATION_MAX = CONFIG.ANIMATION.DELAY_RANGE + CONFIG.ANIMATION.DURATION_RANGE;
+        
+        // Утилиты
+        const Utils = {
+            showSaveIndicator: function(message, type = 'success') {
+                const indicator = document.getElementById('save-indicator');
+                const messageElement = document.getElementById('save-message');
+                
+                if (indicator && messageElement) {
+                    messageElement.textContent = message;
+                    indicator.className = `save-indicator ${type} show`;
+                    
+                    setTimeout(() => {
+                        indicator.classList.remove('show');
+                    }, 2000);
+                }
+            },
+            
+            debounce: function(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            },
+            
+            getRandomColor: function() {
+                return Math.floor(Math.random() * TOTAL_BALL_COLORS) + 1;
+            },
+            
+            getRandomPosition: function() {
+                return Math.random() * 100;
+            },
+            
+            getRandomAnimationDelay: function() {
+                return Math.random() * ANIMATION_DELAY_MAX;
+            },
+            
+            getRandomAnimationDuration: function() {
+                return ANIMATION_DURATION_MIN + Math.random() * (ANIMATION_DURATION_MAX - ANIMATION_DURATION_MIN);
+            }
+        };
+        
+        // Модуль для обработки ошибок
+        const ErrorHandler = {
+            handleAPIError: function(error, context = '') {
+                console.error(`API Error ${context}:`, error);
+                
+                let message = 'Произошла ошибка при сохранении';
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    message = 'Ошибка соединения с сервером';
+                } else if (error.message) {
+                    message = error.message;
+                }
+                
+                Utils.showSaveIndicator(message, 'error');
+                return message;
+            },
+            
+            handleValidationError: function(field, value) {
+                console.warn(`Validation Error: Invalid ${field} value:`, value);
+                Utils.showSaveIndicator(`Некорректное значение для ${field}`, 'error');
+            },
+            
+            handleNetworkError: function() {
+                Utils.showSaveIndicator('Проблемы с интернет-соединением', 'error');
+            },
+            
+            retryOperation: function(operation, maxRetries = 3, delay = 1000) {
+                return new Promise((resolve, reject) => {
+                    let attempts = 0;
+                    
+                    const attempt = () => {
+                        attempts++;
+                        operation()
+                            .then(resolve)
+                            .catch(error => {
+                                if (attempts < maxRetries) {
+                                    console.log(`Retry attempt ${attempts}/${maxRetries}`);
+                                    setTimeout(attempt, delay * attempts);
+                                } else {
+                                    reject(error);
+                                }
+                            });
+                    };
+                    
+                    attempt();
+                });
+            }
+        };
+        
+        // API функции
+        const API = {
+            updateTask: function(taskNumber, field, value) {
+                // Валидация входных данных
+                if (!taskNumber || !field) {
+                    ErrorHandler.handleValidationError('taskNumber or field', { taskNumber, field });
+                    return Promise.reject(new Error('Invalid parameters'));
+                }
+                
+                return fetch('/update_task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        task_number: taskNumber,
+                        field: field,
+                        value: value
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    ErrorHandler.handleAPIError(error, 'updateTask');
+                    throw error;
+                });
+            },
+            
+            addTask: function(taskData) {
+                return fetch('/add_task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(taskData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    ErrorHandler.handleAPIError(error, 'addTask');
+                    throw error;
+                });
+            },
+            
+            deleteTask: function(taskNumber) {
+                if (!taskNumber) {
+                    ErrorHandler.handleValidationError('taskNumber', taskNumber);
+                    return Promise.reject(new Error('Invalid parameters'));
+                }
+                
+                return fetch('/delete_task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        task_number: taskNumber
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    ErrorHandler.handleAPIError(error, 'deleteTask');
+                    throw error;
+                });
+            }
+        };
+        
+        // Функции для работы с задачами
+        const TaskManager = {
+            updateTaskStatus: function(checkbox) {
+                const taskNumber = checkbox.getAttribute('data-task-number');
+                const solutionNumber = checkbox.getAttribute('data-solution');
+                const isChecked = checkbox.checked;
+                
+                // Валидация
+                if (!taskNumber || !solutionNumber) {
+                    ErrorHandler.handleValidationError('taskNumber or solutionNumber', { taskNumber, solutionNumber });
+                    return;
+                }
+                
+                Utils.showSaveIndicator('Сохранение...', 'saving');
+                
+                const operation = () => API.updateTask(taskNumber, `solution_${solutionNumber}`, isChecked ? 1 : 0);
+                
+                ErrorHandler.retryOperation(operation)
+                    .then(data => {
+                        if (data.success) {
+                            Utils.showSaveIndicator('Прогресс сохранен!', 'success');
+                            ProgressTracker.updateProgress();
+                        } else {
+                            Utils.showSaveIndicator(data.error || 'Ошибка при сохранении', 'error');
+                            this.revertCheckboxState(checkbox, isChecked);
+                        }
+                    })
+                    .catch(error => {
+                        ErrorHandler.handleAPIError(error, 'updateTaskStatus');
+                        this.revertCheckboxState(checkbox, isChecked);
+                    });
+            },
+            
+            revertCheckboxState: function(checkbox, originalState) {
+                checkbox.checked = !originalState;
+            },
+            
+            showAddTaskModal: function() {
+                const modal = document.getElementById('add-task-modal');
+                modal.style.display = 'block';
+                document.getElementById('task-title').focus();
+            },
+            
+            hideAddTaskModal: function() {
+                const modal = document.getElementById('add-task-modal');
+                modal.style.display = 'none';
+                document.getElementById('add-task-form').reset();
+            },
+            
+            addTask: function() {
+                const form = document.getElementById('add-task-form');
+                const formData = new FormData(form);
+                const taskData = {
+                    title: formData.get('title'),
+                    difficulty: formData.get('difficulty'),
+                    leetcode_link: formData.get('leetcode_link'),
+                    theme: formData.get('theme'),
+                    ideas: formData.get('ideas')
+                };
+                
+                // Валидация
+                if (!taskData.title.trim()) {
+                    Utils.showSaveIndicator('Название задачи обязательно', 'error');
+                    return;
+                }
+                
+                Utils.showSaveIndicator('Добавление задачи...', 'saving');
+                
+                API.addTask(taskData)
+                    .then(data => {
+                        if (data.success) {
+                            Utils.showSaveIndicator(data.message, 'success');
+                            this.hideAddTaskModal();
+                            // Перезагружаем страницу для обновления таблицы
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            Utils.showSaveIndicator(data.message || 'Ошибка при добавлении задачи', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Utils.showSaveIndicator('Ошибка при добавлении задачи', 'error');
+                    });
+            },
+            
+            deleteTask: function(taskNumber, taskTitle) {
+                if (!confirm(`Вы уверены, что хотите удалить задачу "${taskTitle}"?`)) {
+                    return;
+                }
+                
+                Utils.showSaveIndicator('Удаление задачи...', 'saving');
+                
+                API.deleteTask(taskNumber)
+                    .then(data => {
+                        if (data.success) {
+                            Utils.showSaveIndicator(data.message, 'success');
+                            // Перезагружаем страницу для обновления таблицы
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            Utils.showSaveIndicator(data.message || 'Ошибка при удалении задачи', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Utils.showSaveIndicator('Ошибка при удалении задачи', 'error');
+                    });
+            }
+        };
+        
+        // Модуль для отслеживания прогресса
+        const ProgressTracker = {
+            updateProgress: function() {
+                const stats = this.calculateProgressStats();
+                this.updateProgressUI(stats);
+                BallManager.updateFloatingBalls(stats.startedTasks, stats.completedTasks);
+            },
+            
+            calculateProgressStats: function() {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                const taskGroups = this.groupCheckboxesByTask(checkboxes);
+                
+                let totalChecked = 0;
+                let completedTasks = 0;
+                let startedTasks = 0;
+                
+                Object.values(taskGroups).forEach(group => {
+                    let checkedInGroup = 0;
+                    group.forEach(checkbox => {
+                        if (checkbox.checked) {
+                            totalChecked++;
+                            checkedInGroup++;
+                        }
+                    });
+                    
+                    if (checkedInGroup > 0) {
+                        startedTasks++;
+                    }
+                    if (checkedInGroup === TOTAL_SOLUTIONS_PER_TASK) {
+                        completedTasks++;
+                    }
+                });
+                
+                const totalTasks = Object.keys(taskGroups).length;
+                const progressPercent = totalTasks > 0 ? 
+                    Math.round((startedTasks / totalTasks) * 100) : 0;
+                
+                return {
+                    totalChecked,
+                    totalCheckboxes: checkboxes.length,
+                    totalTasks,
+                    completedTasks,
+                    startedTasks,
+                    progressPercent
+                };
+            },
+            
+            groupCheckboxesByTask: function(checkboxes) {
+                const taskGroups = {};
+                checkboxes.forEach(checkbox => {
+                    const taskNumber = checkbox.getAttribute('data-task-number');
+                    if (!taskGroups[taskNumber]) {
+                        taskGroups[taskNumber] = [];
+                    }
+                    taskGroups[taskNumber].push(checkbox);
+                });
+                return taskGroups;
+            },
+            
+            updateProgressUI: function(stats) {
+                const elements = {
+                    startedTasks: document.getElementById('started-tasks'),
+                    completedTasks: document.getElementById('completed-tasks'),
+                    progressPercent: document.getElementById('progress-percent'),
+                    progressFill: document.getElementById('progress-fill')
+                };
+                
+                if (elements.startedTasks) elements.startedTasks.textContent = stats.startedTasks;
+                if (elements.completedTasks) elements.completedTasks.textContent = stats.completedTasks;
+                if (elements.progressPercent) elements.progressPercent.textContent = stats.progressPercent + '%';
+                if (elements.progressFill) elements.progressFill.style.width = stats.progressPercent + '%';
+            }
+        };
+        
+        // Модуль для управления шариками
+        const BallManager = {
+            createFloatingBalls: function() {
+                const container = document.getElementById('balls-container');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                const tasksData = {{ tasks|tojson }};
+                const allBalls = [];
+                
+                // Создаём шарики в порядке: Easy, Medium, Hard
+                const difficulties = ['easy', 'medium', 'hard'];
+                difficulties.forEach(difficulty => {
+                    const balls = this.createBallsForDifficulty(tasksData, difficulty);
+                    allBalls.push(...balls);
+                });
+                
+                // Добавляем шарики в контейнер
+                allBalls.forEach(ball => container.appendChild(ball));
+            },
+            
+            createBallsForDifficulty: function(tasksData, difficulty) {
+                const balls = [];
+                const difficultyConfig = this.getDifficultyConfig(difficulty);
+                
+                tasksData.forEach(task => {
+                    if (task.difficulty.toLowerCase() === difficulty) {
+                        for (let solution = 1; solution <= CONFIG.TOTAL_SOLUTIONS_PER_TASK; solution++) {
+                            const ball = this.createBall(difficultyConfig);
+                            balls.push(ball);
+                        }
+                    }
+                });
+                
+                return balls;
+            },
+            
+            getDifficultyConfig: function(difficulty) {
+                const configs = {
+                    easy: { size: CONFIG.BALL_SIZES.EASY, sizeClass: 'ball-easy' },
+                    medium: { size: CONFIG.BALL_SIZES.MEDIUM, sizeClass: 'ball-medium' },
+                    hard: { size: CONFIG.BALL_SIZES.HARD, sizeClass: 'ball-hard' }
+                };
+                return configs[difficulty];
+            },
+            
+            createBall: function(config) {
+                const ball = document.createElement('div');
+                const colorClass = `ball-color-${Utils.getRandomColor()}`;
+                
+                ball.className = `floating-ball ${config.sizeClass} ${colorClass}`;
+                ball.style.display = 'none';
+                ball.style.setProperty('width', config.size + 'px', 'important');
+                ball.style.setProperty('height', config.size + 'px', 'important');
+                ball.style.top = Utils.getRandomPosition() + '%';
+                ball.style.left = Utils.getRandomPosition() + '%';
+                ball.style.animationDelay = Utils.getRandomAnimationDelay() + 's';
+                ball.style.animationDuration = Utils.getRandomAnimationDuration() + 's';
+                
+                // Добавляем обработчик клика
+                ball.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    BallManager.handleBallClick(this);
+                });
+                
+                return ball;
+            },
+            
+            handleBallClick: function(ball) {
+                // Предотвращаем повторные клики
+                if (ball.classList.contains('flying-away')) return;
+                
+                // Показываем уведомление
+                const difficulty = this.getBallDifficulty(ball);
+                const message = `Клик по ${difficulty} шарику! 🎯`;
+                Utils.showSaveIndicator(message, 'success');
+                
+                // Добавляем звуковой эффект
+                this.playClickSound();
+                
+                // Запускаем полет шарика
+                this.makeBallFlyAway(ball);
+            },
+            
+            getBallDifficulty: function(ball) {
+                if (ball.classList.contains('ball-easy')) return 'легкому';
+                if (ball.classList.contains('ball-medium')) return 'среднему';
+                if (ball.classList.contains('ball-hard')) return 'сложному';
+                return 'неизвестному';
+            },
+            
+            makeBallFlyAway: function(ball) {
+                this.resetBallAnimation(ball);
+                this.forceRepaint(ball);
+                
+                const nearestEdge = this.findNearestEdge(ball);
+                const flyDirection = this.calculateFlyDirection(nearestEdge);
+                
+                this.setFlyDirection(ball, flyDirection);
+                this.startFlyAnimation(ball);
+                
+                this.scheduleBallRecovery(ball, nearestEdge);
+            },
+            
+            resetBallAnimation: function(ball) {
+                ball.style.animation = 'none';
+                ball.style.animationDelay = CONFIG.ANIMATION.FLY_DELAY + 's';
+                ball.style.animationDuration = CONFIG.ANIMATION.FLY_DURATION + 'ms';
+                ball.style.animationFillMode = 'forwards';
+                ball.style.animationTimingFunction = 'ease-out';
+            },
+            
+            forceRepaint: function(ball) {
+                ball.offsetHeight; // Принудительная перерисовка
+            },
+            
+            findNearestEdge: function(ball) {
+                const ballRect = ball.getBoundingClientRect();
+                const headerRect = document.querySelector('.header').getBoundingClientRect();
+                
+                const distances = {
+                    right: headerRect.right - ballRect.right,
+                    left: ballRect.left - headerRect.left,
+                    top: ballRect.top - headerRect.top,
+                    bottom: headerRect.bottom - ballRect.bottom
+                };
+                
+                return Object.keys(distances).reduce((a, b) => 
+                    distances[a] < distances[b] ? a : b
+                );
+            },
+            
+            calculateFlyDirection: function(edge) {
+                const randomOffset = () => (Math.random() - 0.5) * CONFIG.ANIMATION.POSITION_RANGE;
+                
+                const directions = {
+                    right: { x: '100vw', y: randomOffset() + 'vh' },
+                    left: { x: '-100vw', y: randomOffset() + 'vh' },
+                    top: { x: randomOffset() + 'vw', y: '-100vh' },
+                    bottom: { x: randomOffset() + 'vw', y: '100vh' }
+                };
+                
+                return directions[edge] || { x: '0vw', y: '0vh' };
+            },
+            
+            setFlyDirection: function(ball, direction) {
+                ball.style.setProperty('--fly-x', direction.x);
+                ball.style.setProperty('--fly-y', direction.y);
+            },
+            
+            startFlyAnimation: function(ball) {
+                ball.classList.add('flying-away');
+            },
+            
+            scheduleBallRecovery: function(ball, edge) {
+                setTimeout(() => {
+                    this.recoverBall(ball, edge);
+                }, CONFIG.ANIMATION.FLY_DURATION);
+            },
+            
+            recoverBall: function(ball, edge) {
+                this.stopFlyAnimation(ball);
+                this.resetBallPosition(ball, edge);
+                this.restoreNormalAnimation(ball);
+            },
+            
+            stopFlyAnimation: function(ball) {
+                ball.classList.remove('flying-away');
+                ball.style.animation = '';
+                ball.style.removeProperty('--fly-x');
+                ball.style.removeProperty('--fly-y');
+            },
+            
+            resetBallPosition: function(ball, edge) {
+                const newPosition = this.getPositionNearEdge(edge);
+                ball.style.top = newPosition.top + '%';
+                ball.style.left = newPosition.left + '%';
+            },
+            
+            restoreNormalAnimation: function(ball) {
+                ball.style.animationDelay = Utils.getRandomAnimationDelay() + 's';
+                ball.style.animationDuration = Utils.getRandomAnimationDuration() + 's';
+            },
+            
+            getPositionNearEdge: function(edge) {
+                const { NEAR_EDGE_MIN, NEAR_EDGE_MAX, FAR_EDGE_MIN, FAR_EDGE_MAX } = CONFIG.EDGE_POSITIONS;
+                const randomInRange = (min, max) => min + Math.random() * (max - min);
+                
+                switch(edge) {
+                    case 'right':
+                        return { 
+                            top: randomInRange(0, CONFIG.ANIMATION.POSITION_RANGE), 
+                            left: randomInRange(NEAR_EDGE_MIN, NEAR_EDGE_MAX) 
+                        };
+                    case 'left':
+                        return { 
+                            top: randomInRange(0, CONFIG.ANIMATION.POSITION_RANGE), 
+                            left: randomInRange(FAR_EDGE_MIN, FAR_EDGE_MAX) 
+                        };
+                    case 'top':
+                        return { 
+                            top: randomInRange(FAR_EDGE_MIN, FAR_EDGE_MAX), 
+                            left: randomInRange(0, CONFIG.ANIMATION.POSITION_RANGE) 
+                        };
+                    case 'bottom':
+                        return { 
+                            top: randomInRange(NEAR_EDGE_MIN, NEAR_EDGE_MAX), 
+                            left: randomInRange(0, CONFIG.ANIMATION.POSITION_RANGE) 
+                        };
+                    default:
+                        return { 
+                            top: randomInRange(0, CONFIG.ANIMATION.POSITION_RANGE), 
+                            left: randomInRange(0, CONFIG.ANIMATION.POSITION_RANGE) 
+                        };
+                }
+            },
+            
+            shouldShowBall: function(ball) {
+                // Проверяем, должен ли шарик быть видимым на основе текущего прогресса
+                const checkedCounts = this.countCheckedSolutionsByDifficulty();
+                const allBalls = document.querySelectorAll('.floating-ball');
+                
+                // Подсчитываем, сколько шариков каждого типа должно быть видимо
+                let easyCount = 0, mediumCount = 0, hardCount = 0;
+                let easyIndex = 0, mediumIndex = 0, hardIndex = 0;
+                
+                // Находим индексы для каждого типа сложности
+                allBalls.forEach((b, index) => {
+                    if (b.classList.contains('ball-easy')) {
+                        if (index < checkedCounts.easy) easyCount++;
+                        if (b === ball) easyIndex = easyCount;
+                    } else if (b.classList.contains('ball-medium')) {
+                        if (index < checkedCounts.medium) mediumCount++;
+                        if (b === ball) mediumIndex = mediumCount;
+                    } else if (b.classList.contains('ball-hard')) {
+                        if (index < checkedCounts.hard) hardCount++;
+                        if (b === ball) hardIndex = hardCount;
+                    }
+                });
+                
+                // Проверяем, должен ли этот конкретный шарик быть видимым
+                if (ball.classList.contains('ball-easy')) {
+                    return easyIndex <= checkedCounts.easy;
+                } else if (ball.classList.contains('ball-medium')) {
+                    return mediumIndex <= checkedCounts.medium;
+                } else if (ball.classList.contains('ball-hard')) {
+                    return hardIndex <= checkedCounts.hard;
+                }
+                
+                return false;
+            },
+            
+            playClickSound: function() {
+                // Создаем простой звуковой эффект
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                } catch (e) {
+                    // Игнорируем ошибки звука
+                }
+            },
+            
+            updateFloatingBalls: function(startedTasks, completedTasks) {
+                const balls = document.querySelectorAll('.floating-ball');
+                this.hideAllBalls(balls);
+                
+                const checkedCounts = this.countCheckedSolutionsByDifficulty();
+                this.showBallsByDifficulty(balls, checkedCounts);
+            },
+            
+            hideAllBalls: function(balls) {
+                balls.forEach(ball => {
+                    ball.style.display = 'none';
+                });
+            },
+            
+            countCheckedSolutionsByDifficulty: function() {
+                let easyChecked = 0, mediumChecked = 0, hardChecked = 0;
+                
+                const tasksData = {{ tasks|tojson }};
+                tasksData.forEach(task => {
+                    const taskRow = document.querySelector(`tr[data-task-id="${task.number}"]`);
+                    if (taskRow) {
+                        const checkboxes = taskRow.querySelectorAll('input[type="checkbox"]');
+                        checkboxes.forEach(checkbox => {
+                            if (checkbox.checked) {
+                                const difficulty = task.difficulty.toLowerCase();
+                                if (difficulty === 'easy') easyChecked++;
+                                else if (difficulty === 'medium') mediumChecked++;
+                                else if (difficulty === 'hard') hardChecked++;
+                            }
+                        });
+                    }
+                });
+                
+                return { easyChecked, mediumChecked, hardChecked };
+            },
+            
+            showBallsByDifficulty: function(balls, counts) {
+                const startIndices = this.getDifficultyStartIndices();
+                
+                // Показываем Easy шарики
+                this.showBallsInRange(balls, 0, counts.easyChecked);
+                
+                // Показываем Medium шарики
+                this.showBallsInRange(balls, startIndices.medium, counts.mediumChecked);
+                
+                // Показываем Hard шарики
+                this.showBallsInRange(balls, startIndices.hard, counts.hardChecked);
+            },
+            
+            getDifficultyStartIndices: function() {
+                const counts = TaskCounts.getCounts();
+                return {
+                    medium: counts.EASY * TOTAL_SOLUTIONS_PER_TASK,
+                    hard: (counts.EASY + counts.MEDIUM) * TOTAL_SOLUTIONS_PER_TASK
+                };
+            },
+            
+            showBallsInRange: function(balls, startIndex, count) {
+                for (let i = 0; i < count; i++) {
+                    const ballIndex = startIndex + i;
+                    if (ballIndex < balls.length) {
+                        balls[ballIndex].style.display = 'block';
+                    }
+                }
+            },
+            
+        };
+        
+        // Глобальные функции для совместимости с HTML
+        function updateTaskStatus(checkbox) {
+            TaskManager.updateTaskStatus(checkbox);
+            
+            // Добавляем класс animation-complete через 5 секунд для остановки переливания
+            if (checkbox.checked) {
+                const checkmark = checkbox.nextElementSibling;
+                setTimeout(() => {
+                    checkmark.classList.add('animation-complete');
+                }, 5000);
+            } else {
+                // Убираем класс при снятии галочки
+                const checkmark = checkbox.nextElementSibling;
+                checkmark.classList.remove('animation-complete');
+            }
+        }
+        
+        function updateProgress() {
+            ProgressTracker.updateProgress();
+        }
+        
+        function createFloatingBalls() {
+            BallManager.createFloatingBalls();
+        }
+        
+        function updateFloatingBalls(startedTasks, completedTasks) {
+            BallManager.updateFloatingBalls(startedTasks, completedTasks);
+        }
+        
+        function showSaveIndicator(message, type = 'success') {
+            Utils.showSaveIndicator(message, type);
+        }
+        
+        function makeEditable(cell) {
+            // Если уже редактируется, не делать ничего
+            if (cell.querySelector('.editable-input')) return;
+            
+            const taskNumber = cell.getAttribute('data-task-number');
+            const field = cell.getAttribute('data-field');
+            const contentSpan = cell.querySelector('.cell-content');
+            const originalText = contentSpan.textContent;
+            
+            // Создаем input элемент
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'editable-input';
+            input.value = originalText;
+            
+            // Обработчики событий
+            input.onkeydown = function(event) {
+                if (event.key === 'Enter') {
+                    const newValue = input.value;
+                    contentSpan.textContent = newValue;
+                    contentSpan.style.display = 'block';
+                    input.remove();
+                    saveNotes(taskNumber, field, newValue);
+                } else if (event.key === 'Escape') {
+                    contentSpan.textContent = originalText;
+                    contentSpan.style.display = 'block';
+                    input.remove();
+                }
+            };
+            
+            input.onblur = function() {
+                // Если не нажали Enter или Escape, сохраняем изменения
+                if (input.parentNode) {
+                    const newValue = input.value;
+                    contentSpan.textContent = newValue;
+                    contentSpan.style.display = 'block';
+                    input.remove();
+                    saveNotes(taskNumber, field, newValue);
+                }
+            };
+            
+            // Заменяем содержимое на input
+            contentSpan.style.display = 'none';
+            cell.appendChild(input);
+            input.focus();
+            input.select();
+        }
+        
+        function saveNotes(taskNumber, field, value) {
+            // Показываем индикатор "сохранение"
+            showSaveIndicator('Сохранение...', 'saving');
+            
+            // Отправляем запрос на сервер
+            fetch('/update_task', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    task_number: taskNumber,
+                    field: field,
+                    value: value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSaveIndicator('Заметки сохранены!', 'success');
+                } else {
+                    showSaveIndicator('Ошибка при сохранении', 'error');
+                }
+                console.log('Заметки обновлены:', data);
+            })
+            .catch(error => {
+                showSaveIndicator('Ошибка при сохранении', 'error');
+                console.error('Ошибка при обновлении заметок:', error);
+            });
+        }
+        
+        // Инициализируем прогресс при загрузке страницы
+        // Обработчики событий
+        document.addEventListener('DOMContentLoaded', function() {
+            createFloatingBalls();
+            updateProgress();
+            
+            // Кнопка добавления задачи
+            const addTaskBtn = document.getElementById('add-task-btn');
+            if (addTaskBtn) {
+                addTaskBtn.addEventListener('click', function() {
+                    TaskManager.showAddTaskModal();
+                });
+            }
+            
+            // Кнопки удаления задач
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.delete-task-btn')) {
+                    const btn = e.target.closest('.delete-task-btn');
+                    const taskNumber = btn.getAttribute('data-task-number');
+                    const taskTitle = btn.getAttribute('data-task-title');
+                    TaskManager.deleteTask(taskNumber, taskTitle);
+                }
+            });
+            
+            // Модальное окно
+            const modal = document.getElementById('add-task-modal');
+            const closeModal = document.getElementById('close-modal');
+            const cancelBtn = document.getElementById('cancel-add-task');
+            const confirmBtn = document.getElementById('confirm-add-task');
+            
+            if (closeModal) {
+                closeModal.addEventListener('click', function() {
+                    TaskManager.hideAddTaskModal();
+                });
+            }
+            
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function() {
+                    TaskManager.hideAddTaskModal();
+                });
+            }
+            
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function() {
+                    TaskManager.addTask();
+                });
+            }
+            
+            // Закрытие модального окна по клику вне его
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        TaskManager.hideAddTaskModal();
+                    }
+                });
+            }
+            
+            // Закрытие модального окна по Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal && modal.style.display === 'block') {
+                    TaskManager.hideAddTaskModal();
+                }
+            });
+            
+        });
+    </script>
+</body>
+</html>
